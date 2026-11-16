@@ -1,0 +1,21 @@
+{
+  "project_license": "PolyForm-Noncommercial-1.0.0",
+  "scope": "Public protocol research references; these are not the license of the new project implementation.",
+  "references": [
+    {
+      "repository": "https://github.com/CursedHardware/mops-vida-pm-watchdog",
+      "commit": "0a18b63f85f61ec785e92e6f41fc0cef65c72fce",
+      "license": "MIT",
+      "notice": "licenses/watchdog-MIT.txt",
+      "files": ["docs/protocol-design.md", "src/service/packets.ts", "src/service/commands.ts", "src/components/SensorConsole/MeasurementInterval.tsx"],
+      "usage": "Protocol identifiers, field layout and controls; no JavaScript runtime bundled."
+    },
+    {
+      "repository": "https://github.com/iseki0/pm25",
+      "commit": "89af28eede00d045ee9bc3ce082c0aa7d725f58a",
+      "license": "MIT",
+      "notice": "licenses/android-MIT.txt",
+      "usage": "Additional Android protocol/client research; no Android runtime bundled."
+    }
+  ]
+}

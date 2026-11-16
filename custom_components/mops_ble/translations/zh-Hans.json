@@ -1,0 +1,34 @@
+{
+  "title": "MOPS 忻风 PM2.5 检测仪",
+  "config": {
+    "step": {
+      "user": {
+        "title": "连接 MOPS 检测仪",
+        "description": "将检测仪开机，放在 HA 蓝牙适配器或已启用主动连接的 ESPHome 蓝牙代理附近。",
+        "data": {"address": "蓝牙地址"}
+      },
+      "bluetooth_confirm": {
+        "title": "连接 MOPS 检测仪",
+        "description": "添加蓝牙地址为 {address} 的 MOPS PM2.5 检测仪，无需原厂账号或 App。"
+      }
+    },
+    "error": {
+      "invalid_address": "请输入有效的蓝牙 MAC 地址",
+      "not_found": "可主动连接的蓝牙适配器尚未发现这台 MOPS 检测仪"
+    },
+    "abort": {
+      "already_configured": "这台 MOPS 检测仪已经接入",
+      "not_supported": "设备没有广播 MOPS 检测仪服务"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "pm25": {"name": "PM2.5"},
+      "battery": {"name": "电量"},
+      "record_time": {"name": "最近测量时间"}
+    },
+    "binary_sensor": {"charging": {"name": "充电中"}},
+    "select": {"interval": {"name": "检测间隔"}},
+    "switch": {"periodic": {"name": "分时检测"}}
+  }
+}

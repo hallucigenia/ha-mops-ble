@@ -1,0 +1,9 @@
+Required Notice: Copyright (c) 2026 hallucigenia
+
+Project implementation, tests, documentation and artwork are made available under
+PolyForm Noncommercial 1.0.0. See LICENSE. Noncommercial modifications and sharing
+must retain the required notice and license terms.
+
+Protocol references retain their own MIT notices. See THIRD_PARTY_NOTICES.md and
+custom_components/mops_ble/licenses/. Third-party rights are not restricted by the
+project license. No manufacturer or Home Assistant endorsement is implied.

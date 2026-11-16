@@ -1,0 +1,34 @@
+{
+  "title": "MOPS PM2.5 Monitor",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect a MOPS monitor",
+        "description": "Turn on the monitor and place it near a Home Assistant Bluetooth adapter or an active ESPHome Bluetooth proxy.",
+        "data": {"address": "Bluetooth address"}
+      },
+      "bluetooth_confirm": {
+        "title": "Connect a MOPS monitor",
+        "description": "Add the MOPS PM2.5 monitor at {address}. No manufacturer account or app is required."
+      }
+    },
+    "error": {
+      "invalid_address": "Enter a valid Bluetooth MAC address",
+      "not_found": "This MOPS monitor is not visible to a connectable Bluetooth adapter"
+    },
+    "abort": {
+      "already_configured": "This MOPS monitor is already configured",
+      "not_supported": "This device does not advertise the MOPS monitor service"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "pm25": {"name": "PM2.5"},
+      "battery": {"name": "Battery"},
+      "record_time": {"name": "Last measurement"}
+    },
+    "binary_sensor": {"charging": {"name": "Charging"}},
+    "select": {"interval": {"name": "Measurement interval"}},
+    "switch": {"periodic": {"name": "Periodic measurement"}}
+  }
+}

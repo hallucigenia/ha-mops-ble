@@ -1,0 +1,29 @@
+name: Compatibility / 兼容性反馈
+description: Share a tested device, firmware or Bluetooth transport combination.
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Model, firmware, HA Core and integration versions
+    validations:
+      required: true
+  - type: input
+    id: transport
+    attributes:
+      label: Adapter or proxy model and firmware (no address or key)
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What was actually tested?
+      description: Report discovery, all six entities, settings, reconnect and reload separately. Mark untested items explicitly.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy review
+      options:
+        - label: This report contains no real device addresses, credentials, home URLs or personal captures.
+          required: true

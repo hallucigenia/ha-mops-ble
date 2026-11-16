@@ -1,0 +1,14 @@
+Required Notice: Copyright (c) 2026 hallucigenia
+
+This integration is licensed under PolyForm Noncommercial 1.0.0. See LICENSE.
+Preserve this required notice and the license when sharing copies or changes.
+
+Protocol research references:
+- CursedHardware/mops-vida-pm-watchdog, revision
+  0a18b63f85f61ec785e92e6f41fc0cef65c72fce; MIT, Copyright (c) 2020 Septs.
+- iseki0/pm25, revision
+  89af28eede00d045ee9bc3ce082c0aa7d725f58a; MIT, Copyright (c) 2020 iseki.
+
+Full reference notices are in licenses/. Their existing rights remain under MIT.
+No upstream JavaScript/Android runtime, stock app or firmware is bundled.
+See UPSTREAM.json for provenance.

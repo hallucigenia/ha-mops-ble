@@ -1,0 +1,37 @@
+name: Bug report / 问题反馈
+description: Report reproducible behavior without personal data.
+body:
+  - type: markdown
+    attributes:
+      value: "Do not attach full HA logs, backups, real MACs, credentials or household screenshots. Read PRIVACY.md first."
+  - type: input
+    id: versions
+    attributes:
+      label: Versions / 版本
+      description: Monitor model, firmware, HA Core and integration version.
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Bluetooth transport
+      options:
+        - Active ESPHome Bluetooth proxy
+        - Direct HA Bluetooth adapter
+        - Other (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Reproduction, expected and actual behavior
+      description: Include the smallest reproduction and a brief redacted error if useful.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy review
+      options:
+        - label: I removed credentials, device addresses, home URLs and personal history.
+          required: true
