@@ -9,7 +9,7 @@ The integration uses Home Assistant's Bluetooth manager, including active ESPHom
 Bluetooth proxies. It requires no manufacturer app, account, cloud service, MQTT
 broker, or monitor firmware modification.
 
-**Status:** public beta (`1.0.1b1`). Maintained by
+**Status:** public beta (`1.0.1b2`). Maintained by
 [hallucigenia](https://github.com/hallucigenia) as an unofficial community project.
 
 ## Features
@@ -154,6 +154,20 @@ To uninstall, remove the integration entry from **Settings → Devices & service
 then remove the component through HACS or delete `custom_components/mops_ble` for
 a manual installation. Restart Home Assistant.
 
+## Optional dashboard card
+
+[MOPS Air](frontend/README.md) adds the device illustration, breathing ring,
+6/24-hour recorded sample history, battery/charging status and native settings.
+It supports configurable entities and English/Simplified Chinese. Install the
+card manually after the integration; HACS Integration installation does not
+register its frontend resource.
+
+<img src="frontend/docs/card-light.png" width="430" alt="MOPS Air card with invented data">
+
+See the [card installation guide](frontend/README.md) and
+[breathing/charging animation](frontend/docs/card-motion.gif). All preview data
+is synthetic; the ring illustrates concentration, not hardware LED state or AQI.
+
 ## Feedback and development
 
 Use [Issues](https://github.com/hallucigenia/ha-mops-ble/issues/new/choose) for bugs
@@ -179,6 +193,11 @@ The checks use the Python standard library and do not connect to HA. Protocol
 tests use synthetic packets; transport tests use HA/Bluetooth stubs. They do not
 replace real HA lifecycle or hardware testing. GitHub Actions also runs hassfest
 and HACS validation. Release notes are in the [changelog](CHANGELOG.md).
+
+For frontend changes, also run `npm run check:build`, `npm test`, and the
+[synthetic browser checks](frontend/README.md#build-and-test). They use Node.js
+22+ and a pinned Playwright development dependency. Browser tests do not connect
+to HA. The card has no runtime package dependencies.
 
 ## License and acknowledgments
 

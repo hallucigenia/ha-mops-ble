@@ -8,7 +8,7 @@
 集成复用 Home Assistant 原生蓝牙管理，支持 ESPHome 主动蓝牙代理。
 无需原厂 App、账号、云服务、MQTT 或修改检测仪固件。
 
-**项目状态**：公开测试版（`1.0.1b1`），由
+**项目状态**：公开测试版（`1.0.1b2`），由
 [hallucigenia](https://github.com/hallucigenia) 维护的非官方社区项目。
 
 ## 功能
@@ -136,6 +136,17 @@ MOPS 集成本身无需 YAML 配置。手动输入蓝牙地址时，设备仍须
 卸载时，先在「**设置 → 设备与服务**」删除集成条目，再通过 HACS 移除组件，
 或删除手动安装的 `custom_components/mops_ble` 目录，然后重启 Home Assistant。
 
+## 可选空气卡片
+
+[MOPS Air](frontend/README.zh-Hans.md) 提供写实机身、呼吸灯环、6／24 小时真实采样历史、
+电量与充电状态及原生设置，支持自定义实体和中英文界面。集成安装后按文档手动安装卡片；
+HACS 的 Integration 安装不会注册卡片资源。
+
+<img src="frontend/docs/card-chinese.png" width="430" alt="使用合成数据的 MOPS 空气卡片">
+
+安装步骤见[卡片说明](frontend/README.zh-Hans.md)，另有[呼吸与充电动图](frontend/docs/card-motion.gif)。
+预览数据全部为合成示例，灯环表达浓度视觉分段，不代表硬件灯效或 AQI 等级。
+
 ## 反馈与开发
 
 问题与兼容性反馈请提交到
@@ -158,6 +169,9 @@ python3 scripts/privacy_check.py --history
 这些检查仅依赖 Python 标准库，不连接 HA。协议测试使用合成报文，
 传输测试使用 HA／蓝牙桩对象，不能代替 HA 实际生命周期与硬件验证。
 GitHub Actions 还会执行 hassfest 和 HACS 校验。版本变更见[更新日志](CHANGELOG.md)。
+
+修改前端时还需执行 `npm run check:build`、`npm test` 和[合成浏览器验证](frontend/README.zh-Hans.md#开发与验证)。
+开发环境使用 Node.js 22+ 与固定版本的 Playwright；浏览器验证不连接 HA，卡片运行时没有包依赖。
 
 ## 许可证与致谢
 

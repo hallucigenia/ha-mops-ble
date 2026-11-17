@@ -17,7 +17,8 @@ Convert a useful protocol case into a synthetic fixture with a valid checksum.
 
 1. Keep changes focused and describe the user-visible effect.
 2. Add a meaningful regression test for protocol, lifecycle, or privacy behavior.
-3. Run the three development checks in the README. Do not connect CI to a live HA
+3. Run the development checks in the README, including frontend/browser checks
+   when changing the card. Commit deterministic frontend build output. Do not connect CI to a live HA
    instance or supply household credentials.
 4. Keep dependencies and references explicit. Preserve their licenses and notices.
 5. Describe real hardware testing separately from stub-based tests.

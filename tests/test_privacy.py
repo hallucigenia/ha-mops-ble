@@ -1,6 +1,7 @@
 """Synthetic leak regressions for the publishing check; no real credentials."""
 
 import importlib.util
+import base64
 from pathlib import Path
 import unittest
 
@@ -55,3 +56,23 @@ class PrivacyTests(unittest.TestCase):
         self.assertIn((0, "invalid PNG"), module.file_findings("icon.png", b"synthetic"))
         data = b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\x00tEXt" + b"\x00" * 4
         self.assertIn((0, "PNG metadata requires review"), module.file_findings("icon.png", data))
+
+    def test_reviews_embedded_images_instead_of_only_scanning_base64_as_text(self):
+        data = b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\x00tEXt" + b"\x00" * 4
+        text = 'const image="data:image/png;base64,' + base64.b64encode(data).decode() + '";'
+        self.assertIn((0, "embedded image: PNG metadata requires review"), module.file_findings("card.js", text.encode()))
+
+    def test_only_exact_reviewed_artwork_keeps_its_provenance_metadata(self):
+        image = PATH.parent.parent / "frontend/assets/mops-shell.png"
+        data = image.read_bytes()
+        self.assertEqual(module.file_findings("illustration.png", data), [])
+        changed = data[:-1] + bytes([data[-1] ^ 1])
+        self.assertIn((0, "PNG metadata requires review"), module.file_findings("illustration.png", changed))
+
+    def test_gif_comments_and_trailing_data_require_review(self):
+        header = b"GIF89a" + b"\x01\x00\x01\x00\x00\x00\x00"
+        self.assertEqual(module.gif_findings(header + b";"), [])
+        self.assertIn((0, "GIF metadata requires review"), module.gif_findings(header + b"!\xfe\x03abc\x00;"))
+        self.assertIn((0, "GIF trailing data"), module.gif_findings(header + b";text"))
+        extra = b"!\xff\x0bNETSCAPE2.0\x08metadata\x00;"
+        self.assertIn((0, "GIF metadata requires review"), module.gif_findings(header + extra))

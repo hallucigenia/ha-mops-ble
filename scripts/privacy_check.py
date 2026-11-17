@@ -1,10 +1,13 @@
 """Check Git-visible files, reachable history, or a release ZIP for common leaks.
 
 This heuristic complements manual review. Findings contain paths and categories,
-never the matching secret. Only a neutral PNG icon is accepted as binary content.
+never the matching secret. PNG/GIF metadata is inspected, including embedded
+images. Only the exact reviewed illustration can retain its C2PA metadata.
 """
 
 import argparse
+import base64
+import hashlib
 import ipaddress
 from pathlib import Path, PurePosixPath
 import re
@@ -12,8 +15,12 @@ import struct
 import subprocess
 import sys
 import zipfile
+import zlib
 
 ROOT = Path(__file__).resolve().parents[1]
+# This exact illustration's C2PA fields were reviewed. Preserve provenance;
+# a changed image or a different metadata chunk still requires a new review.
+REVIEWED_PNG = "6ce862df8887baffc0da4285d7b724f6bbe406c1d717fba9cf875c181b411aa6"
 PLACEHOLDER_MACS = {"AA:BB:CC:DD:EE:FF", "00:00:00:00:00:00"}
 FORBIDDEN_PARTS = {".local", ".storage", "runs", "node_modules", ".venv", "__pycache__", ".git"}
 FORBIDDEN_SUFFIXES = {".apk", ".bin", ".pcap", ".pcapng", ".db", ".sqlite", ".sqlite3", ".log", ".zip", ".pem", ".key", ".pyc"}
@@ -66,26 +73,82 @@ def file_findings(name, data):
         findings.append((0, "excluded path"))
     findings.extend(text_findings(name))
     if path.suffix.lower() == ".png":
-        # Text/EXIF/time chunks can leak metadata. Project icons need none.
+        # Text/EXIF/time chunks can leak metadata. Screenshots and icons need none.
         if not data.startswith(b"\x89PNG\r\n\x1a\n"):
             return findings + [(0, "invalid PNG")]
         offset, chunks = 8, []
         while offset + 12 <= len(data):
             size = struct.unpack(">I", data[offset:offset + 4])[0]
             chunks.append(data[offset + 4:offset + 8])
+            end = offset + 12 + size
+            if end > len(data):
+                break
+            crc = struct.unpack(">I", data[end - 4:end])[0]
+            if zlib.crc32(data[offset + 4:end - 4]) != crc:
+                findings.append((0, "invalid PNG checksum"))
             offset += 12 + size
         if offset != len(data) or not chunks or chunks[-1] != b"IEND":
             findings.append((0, "invalid PNG structure"))
-        if set(chunks) - {b"IHDR", b"IDAT", b"IEND"}:
+        reviewed = hashlib.sha256(data).hexdigest() == REVIEWED_PNG
+        allowed = {b"IHDR", b"IDAT", b"IEND"} | ({b"caBX"} if reviewed else set())
+        if set(chunks) - allowed:
             findings.append((0, "PNG metadata requires review"))
         return findings
+    if path.suffix.lower() == ".gif":
+        return findings + gif_findings(data)
     try:
         value = data.decode("utf-8")
     except UnicodeDecodeError:
         return findings + [(0, "unreviewed binary")]
     if "\x00" in value:
         findings.append((0, "unreviewed binary"))
+    # A text-only scan cannot inspect images embedded in the standalone card.
+    for match in re.finditer(r"data:image/(png|gif);base64,([A-Za-z0-9+/=]+)", value):
+        try:
+            decoded = base64.b64decode(match[2], validate=True)
+            for _, category in file_findings("embedded." + match[1], decoded):
+                findings.append((0, "embedded image: " + category))
+        except ValueError:
+            findings.append((0, "invalid embedded image"))
     return findings + text_findings(value)
+
+
+def gif_findings(data):
+    """Accept image frames, timing and standard looping, not text/comment metadata."""
+    if data[:6] not in (b"GIF87a", b"GIF89a") or len(data) < 13:
+        return [(0, "invalid GIF")]
+    offset = 13 + (3 * 2 ** ((data[10] & 7) + 1) if data[10] & 128 else 0)
+
+    def blocks(position):
+        while position < len(data) and data[position]:
+            position += 1 + data[position]
+        if position >= len(data):
+            raise ValueError
+        return position + 1
+
+    try:
+        while offset < len(data):
+            marker = data[offset]
+            if marker == 59:
+                return [] if offset == len(data) - 1 else [(0, "GIF trailing data")]
+            if marker == 44:
+                flags = data[offset + 9]
+                offset += 10 + (3 * 2 ** ((flags & 7) + 1) if flags & 128 else 0)
+                offset = blocks(offset + 1)  # LZW minimum code size followed by blocks.
+            elif marker == 33:
+                label = data[offset + 1]
+                if label == 249 and data[offset + 2] == 4 and data[offset + 7] == 0:
+                    offset += 8
+                elif (label == 255 and data[offset + 2:offset + 14] == b"\x0bNETSCAPE2.0"
+                      and data[offset + 14:offset + 16] == b"\x03\x01" and data[offset + 18] == 0):
+                    offset += 19
+                else:
+                    return [(0, "GIF metadata requires review")]
+            else:
+                return [(0, "invalid GIF structure")]
+    except (IndexError, ValueError):
+        pass
+    return [(0, "invalid GIF structure")]
 
 
 def git(*args):

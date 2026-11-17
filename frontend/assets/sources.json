@@ -1,0 +1,11 @@
+{
+  "asset": "mops-shell.png",
+  "sha256": "6ce862df8887baffc0da4285d7b724f6bbe406c1d717fba9cf875c181b411aa6",
+  "method": "Project illustration generated with OpenAI image generation, using a product photo as an industrial-design reference.",
+  "referencePage": "https://www.geekpark.net/news/224459",
+  "referenceImage": "https://imgslim.geekpark.net/uploads/image/file/e1/ea/e1ea59e727ca217a00788e108b0695e4.png",
+  "scope": "Unofficial depiction of the MOPS AD520-P001. No manufacturer endorsement or ownership of manufacturer marks is claimed.",
+  "metadataReview": "Original C2PA provenance is preserved. Its readable fields identify the generator, generation time, standard asset identifiers and certificate issuers; no household paths, device addresses, account identifiers or credentials were found. This is a content review, not cryptographic verification of the provenance signature.",
+  "overlay": "The original 1254 by 1254 PNG is unchanged. Ring geometry is fitted to this exact image; color and breathing are a frontend illustration of concentration, not a hardware LED reading or AQI category.",
+  "license": "Project artwork is distributed with the repository's PolyForm Noncommercial 1.0.0 license and required notice. Product names and marks identify the depicted device. See THIRD_PARTY_NOTICES.md."
+}

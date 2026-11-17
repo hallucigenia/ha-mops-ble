@@ -12,6 +12,9 @@ htmlcov/
 .local/
 runs/
 dist/
+!frontend/dist/
+!frontend/dist/mops-air-card.js
+node_modules/
 *.log
 *.zip
 .storage/

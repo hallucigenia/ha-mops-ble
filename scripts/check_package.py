@@ -1,4 +1,4 @@
-"""Check the distributable integration without importing HA or connecting to it."""
+"""Check distributable metadata and project files without importing HA."""
 
 import ast
 import hashlib
@@ -9,6 +9,11 @@ import struct
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPONENT = ROOT / "custom_components/mops_ble"
+
+
+def project_files(pattern):
+    excluded = {".git", "node_modules", ".venv", "runs", ".local", "__pycache__"}
+    return (path for path in ROOT.rglob(pattern) if not (set(path.relative_to(ROOT).parts) & excluded))
 
 
 def keys(value, prefix=""):
@@ -45,15 +50,11 @@ def main():
     for name in ("en.json", "zh-Hans.json"):
         translation = json.loads((COMPONENT / "translations" / name).read_text())
         assert keys(original) == keys(translation), f"Translation keys differ: {name}"
-    for path in ROOT.rglob("*.json"):
-        if ".git" not in path.parts:
-            json.loads(path.read_text())
-    for path in ROOT.rglob("*.py"):
-        if ".git" not in path.parts:
-            ast.parse(path.read_text(), filename=str(path.relative_to(ROOT)))
-    for path in ROOT.rglob("*.md"):
-        if ".git" in path.parts:
-            continue
+    for path in project_files("*.json"):
+        json.loads(path.read_text())
+    for path in project_files("*.py"):
+        ast.parse(path.read_text(), filename=str(path.relative_to(ROOT)))
+    for path in project_files("*.md"):
         for target in re.findall(r"\]\(([^)]+)\)", path.read_text()):
             if not re.match(r"[a-z]+:|#", target):
                 assert (path.parent / target.split("#")[0]).exists(), f"Missing link in {path.relative_to(ROOT)}"

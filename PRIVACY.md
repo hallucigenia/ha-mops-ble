@@ -15,6 +15,16 @@ addresses, device identifiers, absolute timestamps, raw packets, and PM2.5 histo
 HA's surrounding diagnostics and general logs can contain additional metadata:
 review the complete file before sharing it.
 
+The optional dashboard card uses the existing HA frontend session through `hass`
+for history and native actions; it does not store authentication. Its sample
+preview, screenshots and animation use invented data and contain no household
+captures. Names, location and all six entity bindings are user-configurable.
+The standalone JS embeds the original generated illustration. Its exact PNG and
+C2PA provenance fields were reviewed as documented in `frontend/assets/sources.json`;
+this is not verification of the provenance signature. Privacy checks decode
+embedded PNGs, permit provenance only for that exact image hash, and flag changed
+or unreviewed metadata. GIF checks permit image/timing/loop data and reject comments.
+
 ## What to share
 
 Share model, firmware, HA/integration versions, whether you use a direct adapter

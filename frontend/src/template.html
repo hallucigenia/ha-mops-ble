@@ -1,0 +1,41 @@
+<article class="air-card" id="air-card" aria-label="MOPS PM2.5" data-state="stale" data-tone="inactive">
+  <header class="card-heading">
+    <div class="card-title"><h2>MOPS</h2><span data-i18n="air"></span></div>
+    <div class="card-actions">
+      <button class="power-status" id="power-status" type="button" data-i18n-aria="deviceInfo"></button>
+      <button class="icon-button" id="info" data-i18n-aria="deviceInfo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.1"/><path d="M12 10.8v5"/><circle cx="12" cy="7.5" r=".7" fill="currentColor" stroke="none"/></svg></button>
+    </div>
+  </header>
+  <div class="summary">
+    <button class="reading-button" id="reading" data-i18n-aria="expand" aria-expanded="false" aria-controls="details">
+      <span class="metric-label">PM2.5</span><span class="reading-line"><span id="value" aria-live="polite" aria-atomic="true">—</span><span class="unit">μg/m³</span></span>
+      <span class="freshness"><i id="freshness-dot"></i><span id="freshness"></span></span>
+      <span class="sampling-mode" id="sampling-mode"></span>
+    </button>
+    <button class="device-button" id="device" data-i18n-aria="expand" aria-expanded="false" aria-controls="details"><span class="product-stage"><img id="product" src="__MOPS_IMAGE__" data-i18n-alt="product" width="1254" height="1254"></span></button>
+  </div>
+  <button class="spark-button" id="spark-button" data-i18n-aria="expand" aria-expanded="false" aria-controls="details">
+    <span class="spark-heading"><span data-i18n="recent"></span><span class="spark-affordance"><span data-i18n="trend"></span><svg viewBox="0 0 16 16"><path d="m5 6 3 3 3-3"/></svg></span></span>
+    <svg id="spark" viewBox="0 0 360 44" preserveAspectRatio="none" aria-hidden="true"></svg>
+  </button>
+  <div class="details-shell" id="details-shell"><section class="details" id="details" inert data-i18n-aria="history">
+    <div class="details-heading"><span data-i18n="trendTitle"></span><div class="detail-actions"><div class="periods" role="group" data-i18n-aria="range"><button data-period="6" aria-pressed="true" data-i18n="sixHours"></button><button data-period="24" aria-pressed="false" data-i18n="day"></button></div><button class="icon-button" id="collapse" data-i18n-aria="collapse"><svg viewBox="0 0 24 24"><path d="m7 14 5-5 5 5"/></svg></button></div></div>
+    <div class="chart-reading"><span id="detail-value"></span><span id="detail-time"></span></div>
+    <div class="chart-wrapper"><svg id="chart" viewBox="0 0 360 145" role="img" tabindex="0" data-i18n-aria="history"></svg><button id="chart-empty" type="button" hidden></button></div>
+    <div class="chart-axis"></div>
+    <div class="range-summary"><span><span data-i18n="minimum"></span> <b id="minimum">—</b></span><span><span data-i18n="maximum"></span> <b id="maximum">—</b></span><span id="sample-count"></span></div>
+  </section></div>
+</article>
+<dialog id="device-dialog" aria-labelledby="device-title">
+  <header><div><p data-i18n="deviceInfo"></p><h2 id="device-title">MOPS</h2></div><button class="icon-button" id="close-dialog" data-i18n-aria="close"><svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></button></header>
+  <dl>
+    <div><dt data-i18n="model"></dt><dd>AD520-P001</dd></div>
+    <div id="location-row" hidden><dt data-i18n="location"></dt><dd id="info-location"></dd></div>
+    <div><dt data-i18n="connection"></dt><dd id="info-connection">—</dd></div>
+    <div><dt data-i18n="battery"></dt><dd id="info-battery">—</dd></div>
+    <div><dt data-i18n="charging"></dt><dd id="info-charging">—</dd></div>
+    <div><dt data-i18n="measured"></dt><dd id="info-measured">—</dd></div>
+  </dl>
+  <div class="settings"><label class="switch-row"><span><b data-i18n="periodic"></b><small data-i18n="periodicHint"></small></span><input type="checkbox" id="periodic" role="switch"><span class="switch-track" aria-hidden="true"></span></label><label class="interval-row" for="interval"><span data-i18n="interval"></span><select id="interval"></select></label></div>
+  <p class="dialog-note" id="settings-feedback" role="status"></p>
+</dialog>

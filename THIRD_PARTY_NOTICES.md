@@ -22,3 +22,18 @@ entities are maintained in this project. The machine-readable reference record i
 Home Assistant, bleak-retry-connector and their dependencies are installed
 separately and remain subject to their respective licenses. The neutral particle
 icon shipped here is project artwork, not an official manufacturer or HA logo.
+
+## Optional dashboard artwork
+
+The MOPS device depiction is project artwork generated from an industrial-design
+reference, not an official manufacturer photograph. Its reference links, content
+review and exact original-image hash are recorded in
+[frontend/assets/sources.json](frontend/assets/sources.json). Its original C2PA
+provenance is preserved. The project does not claim ownership of the MOPS name,
+wordmark or product industrial design. These identify the depicted device and do
+not imply endorsement. Project illustration and frontend code use the project
+license; no reference photo, manufacturer application or firmware is distributed.
+
+Playwright is a development-only dependency installed separately for synthetic
+browser tests. Its package and browser binaries retain their own licenses and
+are not bundled in the distributed card or integration.
