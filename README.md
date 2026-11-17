@@ -39,8 +39,11 @@ version is incompatible. Version `1.0.1b1` is the first public beta.
 3. Download **MOPS PM2.5 Monitor**, then restart Home Assistant.
 4. Follow the setup steps below.
 
-This repository is intended for installation as a custom repository; inclusion in
-HACS's default catalog is not implied.
+The [default HACS catalog requires an OSI-approved license](https://www.hacs.xyz/docs/publish/include/#check-license),
+so this noncommercial project is distributed as a custom repository. CI explicitly
+skips HACS's license-recognition check and verifies the exact standard PolyForm
+text and required attribution in `scripts/check_package.py`. Other HACS checks
+remain enabled.
 
 ### Manual installation
 

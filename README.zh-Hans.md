@@ -32,6 +32,11 @@
    Monitor，选择可见设备。手动输入地址也须通过广播匹配检查，无需 YAML。
 5. 房间由使用者在设备页指定；实体 ID 由 HA 自动生成。
 
+HACS 默认商店要求 OSI 认可的许可，当前非商业许可通过自定义仓库方式分发。
+CI 显式豁免 HACS 的许可证识别检查，由 `scripts/check_package.py` 校验标准
+PolyForm 原文和作者署名，其他 HACS 检查继续启用。详见
+[HACS 许可规则](https://www.hacs.xyz/docs/publish/include/#check-license)。
+
 初始化只同步设备时钟，保留设备当前采样模式与间隔。每台检测仪持续占用一个蓝牙
 连接名额；代理的配置及凭据由 HA 管理。
 

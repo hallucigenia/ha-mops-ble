@@ -1,6 +1,7 @@
 """Check the distributable integration without importing HA or connecting to it."""
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -29,6 +30,13 @@ def main():
     assert manifest["requirements"] == ["bleak-retry-connector>=4.7.1"]
     assert json.loads((ROOT / "hacs.json").read_text())["homeassistant"] == "2026.11.1"
     assert (ROOT / "LICENSE").read_bytes() == (COMPONENT / "LICENSE").read_bytes()
+    license_data = (ROOT / "LICENSE").read_bytes()
+    required_notice = b"Required Notice: Copyright (c) 2026 hallucigenia\n\n"
+    assert license_data.startswith(required_notice)
+    # Canonical text at polyformproject/polyform-licenses tag 1.0.0,
+    # PolyForm-Noncommercial-1.0.0.md, without changing its standard terms.
+    assert hashlib.sha256(license_data[len(required_notice):]).hexdigest() == (
+        "c0ea4a896d2c8c394b29f9427589996db826cd501c512279ff0ed3ef48fabbe5")
     for name in ("LICENSE", "NOTICE"):
         assert "Required Notice: Copyright (c) 2026 hallucigenia" in (COMPONENT / name).read_text()
     for name in ("watchdog-MIT.txt", "android-MIT.txt"):
