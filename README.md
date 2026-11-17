@@ -1,119 +1,173 @@
 # MOPS BLE for Home Assistant
 
-[简体中文](README.zh-Hans.md)
+English · [简体中文](README.zh-Hans.md)
 
-Connect a MOPS PM2.5 monitor through Home Assistant's Bluetooth integration,
-including existing active ESPHome Bluetooth proxies. No manufacturer app, account,
-cloud service, MQTT broker, or device firmware modification is required.
+A local Bluetooth integration for the **MOPS AD520-P001 PM2.5 monitor**. Read air
+quality and device status, and configure periodic measurements from Home Assistant.
 
-Maintained by [hallucigenia](https://github.com/hallucigenia). This is an unofficial
-community integration. MOPS and Home Assistant names belong to their respective
-owners; no affiliation is implied.
+The integration uses Home Assistant's Bluetooth manager, including active ESPHome
+Bluetooth proxies. It requires no manufacturer app, account, cloud service, MQTT
+broker, or monitor firmware modification.
 
-**Source available for noncommercial use.** Changes and noncommercial sharing are
-allowed under [PolyForm Noncommercial 1.0.0](LICENSE), with the required attribution
-and license notices retained. Commercial use is not granted by this license.
-This is not an OSI-approved open-source license. Third-party materials keep their
-own terms; see [source references and notices](THIRD_PARTY_NOTICES.md).
+**Status:** public beta (`1.0.1b1`). Maintained by
+[hallucigenia](https://github.com/hallucigenia) as an unofficial community project.
+
+## Features
+
+Each monitor provides six entities:
+
+| Entity | Type | Function |
+| --- | --- | --- |
+| PM2.5 | Sensor | Concentration in µg/m³, with Home Assistant statistics support |
+| Battery | Sensor | Battery percentage; diagnostic entity |
+| Charging | Binary sensor | Reported charging state; diagnostic entity |
+| Last measurement | Sensor | Actual sample timestamp; diagnostic entity |
+| Periodic measurement | Switch | Enable or disable scheduled measurements |
+| Measurement interval | Select | Choose 10, 15, 30, 60, 90, or 120 minutes |
+
+The periodic measurement switch controls the sampling schedule, not the monitor's
+power. Firmware 1.12 rejects the 5-minute interval, so it is not offered.
 
 ## Compatibility
 
-| Item | Tested |
+The following combination has been verified on real hardware:
+
+| Component | Verified version or model |
 | --- | --- |
 | Monitor | MOPS AD520-P001 |
 | Monitor firmware | 1.12 |
 | Home Assistant Core | 2026.11.1 |
-| Bluetooth transport | Home Assistant Bluetooth with an active ESPHome proxy |
+| Bluetooth connection | Active ESPHome Bluetooth proxy |
 
-Other firmware, similar AD520 model names, and direct adapters are not yet
-hardware-verified. Compatibility reports are welcome. The minimum HA version is
-conservative and follows the tested version; it is not a claim that every earlier
-version is incompatible. Version `1.0.1b1` is the first public beta.
+The declared minimum Home Assistant version is **2026.11.1**, matching the tested
+version. Other HA versions, monitor firmware, similar AD520 models, and direct
+Bluetooth adapters have not yet been verified. Please submit a
+[compatibility report](https://github.com/hallucigenia/ha-mops-ble/issues/new/choose)
+if you test another combination.
 
 ## Installation
 
+Choose one method, then continue to [Configuration](#configuration).
+
 ### HACS custom repository
 
-1. Open HACS and choose **Custom repositories** from its menu.
-2. Add `https://github.com/hallucigenia/ha-mops-ble` as an **Integration**.
-3. Download **MOPS PM2.5 Monitor**, then restart Home Assistant.
-4. Follow the setup steps below.
+1. Open **HACS → ⋮ → Custom repositories**.
+2. Add `https://github.com/hallucigenia/ha-mops-ble` and select **Integration** as
+   the category.
+3. Find **MOPS PM2.5 Monitor** in HACS and download it.
+4. Restart Home Assistant.
 
-The [default HACS catalog requires an OSI-approved license](https://www.hacs.xyz/docs/publish/include/#check-license),
-so this noncommercial project is distributed as a custom repository. CI explicitly
-skips HACS's license-recognition check and verifies the exact standard PolyForm
-text and required attribution in `scripts/check_package.py`. Other HACS checks
-remain enabled.
+This project is distributed through a HACS custom repository.
 
 ### Manual installation
 
-Copy **only** `custom_components/mops_ble` from this repository into your HA
-configuration directory, keeping all files in that folder, including license
-notices. The resulting path is `custom_components/mops_ble/manifest.json`.
-Restart Home Assistant, then continue below. No YAML configuration is required.
+1. Download and extract the repository using **Code → Download ZIP** on GitHub.
+2. Copy the entire `custom_components/mops_ble` folder into the
+   `custom_components` folder in your Home Assistant configuration directory.
+   Keep all files, including the license and notices.
+3. Restart Home Assistant.
 
-## Setup
+The resulting path must be
+`<config>/custom_components/mops_ble/manifest.json`, where `<config>` is your
+Home Assistant configuration directory.
 
-1. Enable Home Assistant's Bluetooth integration. For an ESPHome proxy, enable
-   active Bluetooth connections (`bluetooth_proxy.active: true`) and ensure a
-   connection slot is available.
-2. Power on the monitor and place it near the adapter or proxy. Close any phone
-   app connected to the monitor.
-3. In **Settings → Devices & services**, confirm the discovered **MOPS PM2.5
-   Monitor**, or choose **Add integration** and select it manually. The manual
-   flow lists visible compatible devices; an address alone does not bypass
-   discovery checks.
-4. Assign a room in HA's device page if desired. Entity IDs are generated by HA;
-   there are no required fixed entity IDs.
+## Configuration
 
-Setup synchronizes the monitor's clock. It preserves the reported measurement
-interval and periodic-measurement setting. Each monitor keeps one active Bluetooth
-connection; proxy configuration and credentials remain managed by HA.
+### 1. Prepare Bluetooth
 
-## Entities and behavior
+- Enable Home Assistant's [Bluetooth integration](https://www.home-assistant.io/integrations/bluetooth/).
+- For an [ESPHome Bluetooth proxy](https://esphome.io/components/bluetooth_proxy/),
+  connect it to HA through the ESPHome integration and enable active connections
+  in the **proxy's ESPHome configuration**:
 
-| Entity | Meaning |
+  ```yaml
+  bluetooth_proxy:
+    active: true
+  ```
+
+- Leave at least one Bluetooth connection slot available. Each monitor maintains
+  one active connection while the integration is running.
+- Turn on the monitor, place it near the adapter or proxy, and close any phone
+  app connected to it.
+
+A proxy that only forwards advertisements cannot provide the connection this
+integration needs.
+
+### 2. Add the monitor
+
+1. Open **Settings → Devices & services**.
+2. Configure the discovered MOPS monitor. If it is not shown, choose **Add
+   integration**, search for **MOPS PM2.5 Monitor**, and select a visible device.
+3. Open the device page to assign an area or rename its entities as needed.
+
+No YAML configuration is required for the MOPS integration. Entering a Bluetooth
+address manually still requires a matching device visible to Home Assistant.
+Entity IDs are generated by Home Assistant; there are no required fixed IDs.
+
+On connection, the integration synchronizes the monitor's clock and preserves its
+current sampling mode and measurement interval. Bluetooth adapter and proxy
+configuration, including credentials, remains managed by Home Assistant.
+
+## Measurement and control behavior
+
+### Measurements
+
+The monitor may send the same sample repeatedly. The integration uses the actual
+sample timestamp to identify new measurements. Repeated status packets, old
+history, and command acknowledgments do not create fresh readings.
+
+Stale data becomes **unavailable**; it is never replaced with zero:
+
+- **Connection:** entities become unavailable on disconnect, and the integration
+  attempts to reconnect through HA.
+- **Telemetry:** data expires after 90 seconds without telemetry. Battery,
+  charging, and settings also require their own reports within 90 seconds.
+- **Samples:** PM2.5 and Last measurement expire after the periodic interval plus
+  90 seconds, with a minimum of 180 seconds. When periodic measurement is off,
+  the limit is 180 seconds.
+
+Availability is checked every 30 seconds, so expiry may appear in the UI up to one
+check interval after its threshold. Recorded history is retained.
+
+### Settings
+
+A change is confirmed only when a new, complete settings report contains the
+requested value. A successful Bluetooth write or command acknowledgment alone
+does not confirm the change.
+
+If confirmation times out, Home Assistant reports an error. The integration does
+not automatically repeat the command; check the monitor's current setting before
+trying again.
+
+## Troubleshooting
+
+| Problem | What to check |
 | --- | --- |
-| PM2.5 sensor | Measured concentration in µg/m³; supports HA statistics |
-| Battery sensor | Reported percentage; diagnostic entity |
-| Charging sensor | Reported charging state; diagnostic entity |
-| Last measurement sensor | Actual sample timestamp; diagnostic entity |
-| Periodic measurement switch | Enables scheduled measurements; not a power switch |
-| Measurement interval select | 10, 15, 30, 60, 90, or 120 minutes |
+| Integration missing from the add dialog | Confirm `custom_components/mops_ble/manifest.json` is in the HA configuration directory, then restart HA |
+| Monitor not discovered | Check power, distance, Bluetooth setup, and whether another app is connected |
+| Monitor discovered but unable to connect | Enable active proxy connections, check free connection slots, and move the monitor closer |
+| Entities unavailable | Check monitor power and Bluetooth coverage; allow HA to reconnect automatically |
+| PM2.5 or Last measurement stops updating | Check the sampling mode and interval; repeated status packets are not new samples |
+| A setting change fails | Check the monitor's reported setting before retrying; firmware 1.12 does not accept a 5-minute interval |
 
-Firmware 1.12 rejects the 5-minute setting offered by a reference client, so this
-integration does not expose it. A setting changes only after a new, complete setup
-report confirms the requested value. A GATT write or acknowledgment alone is not
-confirmation. Unconfirmed control writes are not automatically repeated.
+To uninstall, remove the integration entry from **Settings → Devices & services**,
+then remove the component through HACS or delete `custom_components/mops_ble` for
+a manual installation. Restart Home Assistant.
 
-Repeated notifications do not create new samples. Old history and acknowledgments
-cannot replace live measurements. Data becomes unavailable when telemetry stops
-for 90 seconds; PM2.5 also expires after the measurement interval plus 90 seconds,
-with a minimum lifetime of 180 seconds. The watchdog checks every 30 seconds, so
-the UI transition may follow the threshold by one check interval. Missing data is
-not replaced with zero. Reconnection uses HA's Bluetooth manager.
+## Feedback and development
 
-## Troubleshooting and feedback
+Use [Issues](https://github.com/hallucigenia/ha-mops-ble/issues/new/choose) for bugs
+and compatibility reports, and [pull requests](https://github.com/hallucigenia/ha-mops-ble/pulls)
+for changes. Include the model and firmware, HA and integration versions,
+Bluetooth connection type, reproduction steps, and expected and actual behavior.
 
-- **Not discovered:** check power, distance, active proxy connections, and whether
-  another app holds the monitor's connection. A passive-only proxy cannot connect.
-- **Unavailable:** check free proxy slots and radio coverage. Let HA reconnect;
-  after a setting timeout, check the physical monitor before issuing another write.
-- **No fresh PM2.5:** check the monitor's sampling mode and interval. Repeated status
-  packets do not mean a new air sample was taken.
-- **Remove:** delete the integration entry in **Settings → Devices & services**;
-  then remove it in HACS, or remove the component folder and restart HA.
+Review attachments before sharing. Do not post full HA backups, device addresses,
+access tokens, proxy keys, private hostnames, or screenshots identifying a
+household. See the [privacy guidance](PRIVACY.md) and
+[contributing guide](CONTRIBUTING.md).
 
-Use [Issues](https://github.com/hallucigenia/ha-mops-ble/issues) for bugs and
-compatibility reports, and [PRs](https://github.com/hallucigenia/ha-mops-ble/pulls)
-for changes. Include model, firmware, HA version, integration version, transport
-type, expected behavior, and observed behavior. Do not post full HA backups, real
-Bluetooth addresses, access tokens, proxy keys, private hostnames, or household
-screenshots. See [privacy guidance](PRIVACY.md) and [contributing](CONTRIBUTING.md).
-
-## Development
-
-Offline checks use the Python standard library and do not connect to HA:
+Run these offline checks from the repository root with Python 3.14, matching the
+tested HA runtime:
 
 ```sh
 python3 -B -m unittest discover -s tests -v
@@ -121,7 +175,18 @@ python3 scripts/check_package.py
 python3 scripts/privacy_check.py --history
 ```
 
-Use Python 3.14 for the tested HA runtime. The transport tests use HA/Bluetooth
-stubs; they do not replace real HA lifecycle or hardware testing. GitHub Actions
-also runs hassfest and HACS validation after publication. Hardware reports should
-state which combinations were actually tested.
+The checks use the Python standard library and do not connect to HA. Protocol
+tests use synthetic packets; transport tests use HA/Bluetooth stubs. They do not
+replace real HA lifecycle or hardware testing. GitHub Actions also runs hassfest
+and HACS validation. Release notes are in the [changelog](CHANGELOG.md).
+
+## License and acknowledgments
+
+**Source available for noncommercial use** under
+[PolyForm Noncommercial 1.0.0](LICENSE). Noncommercial use, modification, and sharing
+must retain the required attribution and license notices. The license does not
+grant commercial use and is not an OSI-approved open-source license.
+
+Third-party references retain their own licenses; see
+[third-party notices](THIRD_PARTY_NOTICES.md). This project is not affiliated with
+or endorsed by MOPS or Home Assistant.

@@ -1,73 +1,153 @@
 # MOPS BLE：Home Assistant 忻风 PM2.5 集成
 
-[English](README.md)
+[English](README.md) · 简体中文
 
-复用 HA 原生 Bluetooth 和既有 ESPHome 主动蓝牙代理，不需要原厂 App、账号、
-云服务、MQTT 或刷机。作者署名为 [hallucigenia](https://github.com/hallucigenia)。
-这是非官方社区集成，与 MOPS、Home Assistant 厂商或项目没有隶属关系。
+将 **MOPS 忻风 AD520-P001 PM2.5 检测仪**通过本地蓝牙接入 Home Assistant，
+读取空气质量与设备状态，并设置分时检测。
 
-**非商业源码公开**：采用 [PolyForm Noncommercial 1.0.0](LICENSE)，允许非商业
-使用、修改及分享，须保留 Required Notice 作者署名和许可条款。本许可不授予商业
-使用权，不属于 OSI 定义的开源许可。第三方参考材料仍遵循各自许可，详见
-[来源与声明](THIRD_PARTY_NOTICES.md)。许可原文还列出了允许的非商业机构用途，
-以原文为准。
+集成复用 Home Assistant 原生蓝牙管理，支持 ESPHome 主动蓝牙代理。
+无需原厂 App、账号、云服务、MQTT 或修改检测仪固件。
 
-## 已验证范围
+**项目状态**：公开测试版（`1.0.1b1`），由
+[hallucigenia](https://github.com/hallucigenia) 维护的非官方社区项目。
 
-- 设备：MOPS AD520-P001；固件：1.12。
-- Home Assistant Core：2026.11.1；传输：ESPHome 主动蓝牙代理。
-- 其他固件、相近 AD520 型号及直连适配器尚待实机反馈，不作兼容性承诺。
-- `1.0.1b1` 为首个公开测试版；最低 HA 版本按已验证版本设置。
+## 功能
 
-## 安装与配置
+每台检测仪提供六个实体：
 
-1. 在 HACS 的「自定义存储库」添加 `https://github.com/hallucigenia/ha-mops-ble`，
-   类型选择「集成」，下载 MOPS PM2.5 Monitor 后重启 HA。该方式不代表已进入默认商店。
-2. 也可手动将仓库的 `custom_components/mops_ble` 完整复制到 HA 配置目录中的
-   `custom_components/`，保留许可文件并重启；最终应存在
-   `custom_components/mops_ble/manifest.json`。
-3. 启用 HA Bluetooth。ESPHome 代理需启用 `bluetooth_proxy.active: true` 且有空闲
-   连接名额。检测仪通电并靠近代理，关闭正在连接它的手机 App。
-4. 在「设置 → 设备与服务」确认自动发现的设备，或「添加集成」搜索 MOPS PM2.5
-   Monitor，选择可见设备。手动输入地址也须通过广播匹配检查，无需 YAML。
-5. 房间由使用者在设备页指定；实体 ID 由 HA 自动生成。
+| 实体 | 类型 | 用途 |
+| --- | --- | --- |
+| PM2.5 | 传感器 | 浓度，单位 µg/m³，支持 Home Assistant 统计 |
+| 电量 | 传感器 | 电池百分比，诊断实体 |
+| 充电中 | 二元传感器 | 设备上报的充电状态，诊断实体 |
+| 最近测量时间 | 传感器 | 实际采样时间，诊断实体 |
+| 分时检测 | 开关 | 启用或停用定时采样 |
+| 检测间隔 | 选择器 | 可选 10、15、30、60、90、120 分钟 |
 
-HACS 默认商店要求 OSI 认可的许可，当前非商业许可通过自定义仓库方式分发。
-CI 显式豁免 HACS 的许可证识别检查，由 `scripts/check_package.py` 校验标准
-PolyForm 原文和作者署名，其他 HACS 检查继续启用。详见
-[HACS 许可规则](https://www.hacs.xyz/docs/publish/include/#check-license)。
+分时检测开关控制采样计划，不控制整机电源。固件 1.12 会拒绝 5 分钟间隔，
+因此集成不提供该选项。
 
-初始化只同步设备时钟，保留设备当前采样模式与间隔。每台检测仪持续占用一个蓝牙
-连接名额；代理的配置及凭据由 HA 管理。
+## 兼容范围
 
-## 功能与限制
+以下组合已通过实机验证：
 
-提供六类实体：PM2.5（µg/m³，支持统计）、电量、充电状态、最近测量时间、分时检测
-开关和检测间隔。开关控制分时检测，不能代替整机电源；间隔可选 10、15、30、60、
-90、120 分钟。固件 1.12 拒绝 5 分钟设置，因此不提供该选项。
+| 项目 | 已验证型号或版本 |
+| --- | --- |
+| 检测仪 | MOPS AD520-P001 |
+| 检测仪固件 | 1.12 |
+| Home Assistant Core | 2026.11.1 |
+| 蓝牙连接方式 | ESPHome 主动蓝牙代理 |
 
-设置命令须由新的完整设置上报确认，GATT 写入成功或 ACK 不能单独确认成功；未确认
-的控制命令不会自动重发。重复推送不会产生新采样，旧历史与 ACK 不覆盖实时数据。
-蓝牙遥测中断 90 秒后数据失效；PM2.5 也会在采样间隔加 90 秒后失效，最低有效期
-180 秒。每 30 秒检查一次，因此界面可能延后一个检查周期；不可用时不填零。
+声明的最低 Home Assistant 版本为 **2026.11.1**，与已验证版本一致。
+其他 HA 版本、检测仪固件、相近 AD520 型号及直连蓝牙适配器尚未验证。
+如果测试了其他组合，欢迎提交
+[兼容性报告](https://github.com/hallucigenia/ha-mops-ble/issues/new/choose)。
 
-发现或连接失败时，先检查距离、代理主动连接功能、空闲连接名额和手机是否占用连接。
-没有新 PM2.5 时检查检测仪的模式与间隔；频繁状态包不等于新采样。删除集成时先在
-「设置 → 设备与服务」移除，再从 HACS 卸载，或删除组件目录后重启。
+## 安装
 
-## 反馈、贡献与隐私
+选择以下任一方式安装，再继续完成[配置](#配置)。
 
-持续接收 [Issues](https://github.com/hallucigenia/ha-mops-ble/issues)、
-[PR](https://github.com/hallucigenia/ha-mops-ble/pulls) 和兼容性报告。请提供型号、
-固件、HA 与集成版本、传输类型、预期与实际行为；贡献按项目相同许可提交，并保留
-贡献者自己的署名。
+### 通过 HACS 自定义存储库安装
 
-不要公开完整备份、真实 MAC、家庭地址或房间截图、访问令牌、代理密钥及内网域名。
-集成专属诊断仅导出版本、设置、电量、充电与连接状态及相对时间；分享前仍需检查
-HA 附带的通用诊断元数据。详见 [隐私说明](PRIVACY.md) 和
+1. 打开 **HACS → ⋮ → 自定义存储库**。
+2. 添加 `https://github.com/hallucigenia/ha-mops-ble`，类别选择「集成」。
+3. 在 HACS 中找到 **MOPS PM2.5 Monitor** 并下载。
+4. 重启 Home Assistant。
+
+本项目通过自定义存储库分发，未进入 HACS 默认目录。
+
+### 手动安装
+
+1. 在 GitHub 仓库页面选择 **Code → Download ZIP**，下载并解压源码。
+2. 将 `custom_components/mops_ble` 整个文件夹复制到 Home Assistant 配置目录的
+   `custom_components` 下，保留所有文件，包括许可证与声明。
+3. 重启 Home Assistant。
+
+最终应存在 `<config>/custom_components/mops_ble/manifest.json`，
+其中 `<config>` 代表 Home Assistant 配置目录。
+
+## 配置
+
+### 1. 准备蓝牙连接
+
+- 启用 Home Assistant 的 [Bluetooth 集成](https://www.home-assistant.io/integrations/bluetooth/)。
+- 如果使用 [ESPHome 蓝牙代理](https://esphome.io/components/bluetooth_proxy/)，
+  先通过 ESPHome 集成将代理接入 HA，并在**代理的 ESPHome 配置**中启用主动连接：
+
+  ```yaml
+  bluetooth_proxy:
+    active: true
+  ```
+
+- 至少预留一个蓝牙连接名额。集成运行时，每台检测仪持续占用一个主动连接。
+- 将检测仪开机并放在适配器或代理附近，关闭正在连接它的手机 App。
+
+仅转发广播的被动代理无法提供本集成所需的蓝牙连接。
+
+### 2. 添加检测仪
+
+1. 打开「**设置 → 设备与服务**」。
+2. 配置自动发现的 MOPS 检测仪。如果未显示，选择「添加集成」，搜索
+   **MOPS PM2.5 Monitor / MOPS 忻风 PM2.5 检测仪**，再选择可见设备。
+3. 进入设备页面，按需分配区域或修改实体名称。
+
+MOPS 集成本身无需 YAML 配置。手动输入蓝牙地址时，设备仍须已被 HA 发现且广播匹配。
+实体 ID 由 Home Assistant 自动生成，无需使用固定名称。
+
+连接时，集成会同步检测仪时钟，并保留设备当前的采样模式和检测间隔。
+蓝牙适配器及代理的配置与凭据继续由 Home Assistant 管理。
+
+## 测量与控制行为
+
+### 测量数据
+
+检测仪可能重复推送同一条测量。集成按实际采样时间识别新数据；
+重复状态包、旧历史和命令确认不会生成新读数。
+
+过期数据会显示为「**不可用**」，不会填为零：
+
+- **连接**：蓝牙断开时实体变为不可用，集成通过 HA 尝试重连。
+- **遥测**：超过 90 秒未收到遥测后数据失效；电量、充电状态和设置还要求各自的上报不超过 90 秒。
+- **采样**：PM2.5 与最近测量时间在分时检测间隔加 90 秒后失效，最低有效期为 180 秒；
+  关闭分时检测时，有效期为 180 秒。
+
+集成每 30 秒检查一次可用性，因此界面可能比阈值延后最多一个检查周期。
+已记录的历史数据会保留。
+
+### 修改设置
+
+只有检测仪发来新的、完整的设置上报，且包含目标值，集成才确认修改成功。
+蓝牙写入成功或收到命令确认本身不足以确认设置已生效。
+
+确认超时时，Home Assistant 会提示错误。集成不会自动重发控制命令；
+再次操作前，请先检查检测仪当前的设置。
+
+## 常见问题
+
+| 问题 | 排查方法 |
+| --- | --- |
+| 添加集成时搜不到 MOPS | 确认 HA 配置目录下存在 `custom_components/mops_ble/manifest.json`，然后重启 HA |
+| 发现不了检测仪 | 检查电源、距离、Bluetooth 集成，以及是否被其他 App 占用连接 |
+| 已发现但无法连接 | 检查代理是否启用主动连接、是否有空闲名额，并将检测仪移近 |
+| 实体显示不可用 | 检查检测仪电源和蓝牙覆盖，等待 HA 自动重连 |
+| PM2.5 或最近测量时间不更新 | 检查设备采样模式与间隔；频繁的状态包不代表产生了新采样 |
+| 修改设置失败 | 重试前先确认设备当前设置；固件 1.12 不接受 5 分钟间隔 |
+
+卸载时，先在「**设置 → 设备与服务**」删除集成条目，再通过 HACS 移除组件，
+或删除手动安装的 `custom_components/mops_ble` 目录，然后重启 Home Assistant。
+
+## 反馈与开发
+
+问题与兼容性反馈请提交到
+[Issues](https://github.com/hallucigenia/ha-mops-ble/issues/new/choose)，
+代码修改可提交 [Pull Request](https://github.com/hallucigenia/ha-mops-ble/pulls)。
+请提供检测仪型号与固件、HA 与集成版本、蓝牙连接方式、复现步骤，以及预期和实际行为。
+
+分享附件前请先检查内容。不要公开完整 HA 备份、设备地址、访问令牌、代理密钥、
+内网域名或可识别家庭信息的截图。详见[隐私说明](PRIVACY.md)和
 [贡献指南](CONTRIBUTING.md)。
 
-离线检查在仓库根目录执行，无需连接家庭 HA：
+在仓库根目录运行以下离线检查，使用与已验证 HA 运行环境一致的 Python 3.14：
 
 ```sh
 python3 -B -m unittest discover -s tests -v
@@ -75,4 +155,15 @@ python3 scripts/check_package.py
 python3 scripts/privacy_check.py --history
 ```
 
-协议和传输测试使用合成报文与桩对象；HA 实际加载和不同硬件仍需独立验证。
+这些检查仅依赖 Python 标准库，不连接 HA。协议测试使用合成报文，
+传输测试使用 HA／蓝牙桩对象，不能代替 HA 实际生命周期与硬件验证。
+GitHub Actions 还会执行 hassfest 和 HACS 校验。版本变更见[更新日志](CHANGELOG.md)。
+
+## 许可证与致谢
+
+本项目**公开源码，供非商业使用**，采用 [PolyForm Noncommercial 1.0.0](LICENSE)。
+非商业使用、修改及分享须保留要求的作者署名和许可声明。该许可不授予商业使用权，
+不属于 OSI 认可的开源许可。
+
+第三方参考材料保留各自许可，详见[第三方声明](THIRD_PARTY_NOTICES.md)。
+本项目与 MOPS、Home Assistant 厂商或项目没有隶属或背书关系。
